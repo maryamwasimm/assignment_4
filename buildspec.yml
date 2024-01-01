@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region us-east-1)
+  build:
+    commands:
+      - echo Building Docker image...
+      - docker build -t public.ecr.aws/f6n2e9j2/mm .
+      - docker tag public.ecr.aws/f6n2e9j2/mm:latest public.ecr.aws/f6n2e9j2/mm:latest
+  post_build:
+    commands:
+      - echo Pushing Docker images to Amazon ECR...
+      - docker push public.ecr.aws/f6n2e9j2/mm:latest
+      - printf '[{"name":"your-container-name","imageUri":"%s"}]' public.ecr.aws/f6n2e9j2/mm:latest > imagedefinitions.json
+
+artifacts:
+  files: imagedefinitions.json
